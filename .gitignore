@@ -1,0 +1,16 @@
+/target
+.env
+.env.*
+!.env.example
+coverage/
+coverage.html
+coverage.xml
+*.profraw
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
+
+# wt-forge config (user-specific)
+.wt-forge.*

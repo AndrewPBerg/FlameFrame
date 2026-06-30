@@ -1,0 +1,12 @@
+# Cascading Labs — clippy.toml (2024 Edition)
+
+cognitive-complexity-threshold = 20
+absolute-paths-max-segments = 2
+msrv = "1.86.0"
+
+disallowed-macros = [
+  { path = "std::print", reason = "Use tracing instead of print macros." },
+  { path = "std::println", reason = "Use tracing instead of print macros." },
+  { path = "std::eprint", reason = "Use tracing instead of print macros." },
+  { path = "std::eprintln", reason = "Use tracing instead of print macros." },
+]

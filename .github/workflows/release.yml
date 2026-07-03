@@ -1,0 +1,79 @@
+name: Release binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create or update, e.g. v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive: tar.gz
+          - os: macos-13
+            target: x86_64-apple-darwin
+            archive: tar.gz
+          - os: macos-14
+            target: aarch64-apple-darwin
+            archive: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive: zip
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo test --locked
+      - run: cargo build --release --locked --bin flameframe --target ${{ matrix.target }}
+
+      - name: Package binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="${{ matrix.target }}"
+          staging="dist/flameframe-$target"
+          mkdir -p "$staging"
+          cp LICENSE "$staging/"
+
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cp "target/$target/release/flameframe.exe" "$staging/"
+            (cd dist && 7z a "flameframe-$target.zip" "flameframe-$target")
+            asset="dist/flameframe-$target.zip"
+          else
+            cp "target/$target/release/flameframe" "$staging/"
+            chmod 755 "$staging/flameframe"
+            tar -czf "dist/flameframe-$target.tar.gz" -C dist "flameframe-$target"
+            asset="dist/flameframe-$target.tar.gz"
+          fi
+
+          if command -v sha256sum >/dev/null 2>&1; then
+            sha256sum "$asset" > "$asset.sha256"
+          else
+            shasum -a 256 "$asset" > "$asset.sha256"
+          fi
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+          files: |
+            dist/flameframe-${{ matrix.target }}.${{ matrix.archive }}
+            dist/flameframe-${{ matrix.target }}.${{ matrix.archive }}.sha256

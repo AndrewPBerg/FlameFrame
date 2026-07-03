@@ -7,6 +7,11 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/AndrewPBerg/FlameFrame"
 description = "Local-first video-to-context compiler for AI agents"
+default-run = "flameframe"
+
+[[bin]]
+name = "flameframe"
+path = "src/main.rs"
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "deny"
@@ -36,3 +41,7 @@ needless_raw_string_hashes = "allow"
 too_many_lines = "allow"
 
 [dependencies]
+anyhow = "1.0.103"
+clap = { version = "4.6.1", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.150"

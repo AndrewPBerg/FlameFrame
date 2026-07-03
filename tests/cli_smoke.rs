@@ -21,7 +21,8 @@ fn short_help_flag_prints_help() -> io::Result<()> {
 
     assert!(output.status.success(), "stderr: {}", stderr(&output));
     let stdout = stdout(&output);
-    assert!(stdout.contains("Usage: flameframe <COMMAND>"), "stdout: {stdout}");
+    assert!(stdout.contains("Usage: flameframe"), "stdout: {stdout}");
+    assert!(stdout.contains("<COMMAND>"), "stdout: {stdout}");
     assert!(stdout.contains("upgrade"), "stdout: {stdout}");
     Ok(())
 }

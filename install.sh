@@ -54,11 +54,15 @@ tar -xzf "$tmp/$asset" -C "$tmp"
 binary="$tmp/flameframe-$target/flameframe"
 [ -f "$binary" ] || die "release asset did not contain flameframe"
 
-cp "$binary" "$bin_dir/flameframe"
-chmod 755 "$bin_dir/flameframe"
+installed="$bin_dir/flameframe"
+staged="$bin_dir/.flameframe.$$"
+rm -f "$staged"
+cp "$binary" "$staged"
+chmod 755 "$staged"
+mv -f "$staged" "$installed"
 
-echo "Installed: $bin_dir/flameframe"
-"$bin_dir/flameframe" --version
+echo "Installed: $installed"
+"$installed" --version
 
 case ":$PATH:" in
   *":$bin_dir:"*) ;;

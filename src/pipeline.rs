@@ -17,6 +17,7 @@ use crate::{
     context::{self as context_builder, ContextConfig},
     diagnostics,
     ffmpeg::{self, FrameSample, FrameScanConfig, VideoMetadata},
+    workspace,
     ytdlp::{self, DownloadConfig},
 };
 
@@ -60,6 +61,7 @@ struct Verification {
 }
 
 pub fn process(args: &ProcessArgs) -> Result<()> {
+    workspace::ensure_gitignore_for(&args.work_dir)?;
     fs::create_dir_all(&args.work_dir)
         .with_context(|| format!("failed to create {}", args.work_dir.display()))?;
 
@@ -198,6 +200,7 @@ fn ingest_video_path(args: &IngestArgs, video: &Path, source_input: &str) -> Res
 
 pub fn download(args: &DownloadArgs) -> Result<()> {
     diagnostics::require_ytdlp()?;
+    workspace::ensure_gitignore_for(args.dir.as_ref().unwrap_or(&args.out))?;
 
     let result = ytdlp::download_url(
         &args.url,

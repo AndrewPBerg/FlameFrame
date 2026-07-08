@@ -44,7 +44,7 @@ YouTube URL:
 
 ```bash
 flameframe process 'https://www.youtube.com/watch?v=HddLMOxE1Dk' \
-  --work-dir data/river-monsters \
+  --work-dir .flameframe/river-monsters \
   --max-height 480 \
   --budget 40
 ```
@@ -53,11 +53,13 @@ Local video file:
 
 ```bash
 flameframe process ./recording.mp4 \
-  --work-dir data/recording.context \
+  --work-dir .flameframe/recording.context \
   --budget 16 \
   --fps 1 \
   --segment-seconds 60
 ```
+
+FlameFrame writes generated project-scoped artifacts under `.flameframe/` by default and creates `.flameframe/.gitignore` so evidence packs, downloads, segments, and zooms stay out of git.
 
 Agent review order:
 
@@ -79,8 +81,8 @@ flameframe man
 Push a version tag to build and upload binaries:
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 The release workflow publishes binaries for Linux x64, macOS Apple Silicon, and Windows x64.

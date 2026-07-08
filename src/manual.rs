@@ -34,18 +34,22 @@ DESCRIPTION
 PRIMARY USE CASES
     YouTube or web video URL:
         flameframe process 'https://www.youtube.com/watch?v=VIDEO_ID' \
-          --work-dir data/example \
+          --work-dir .flameframe/example \
           --max-height 480 \
           --budget 40
 
     Local video file:
         flameframe process ./recording.mp4 \
-          --work-dir data/recording.context \
+          --work-dir .flameframe/recording.context \
           --budget 16 \
           --fps 1 \
           --segment-seconds 60
 
 OUTPUT
+    FlameFrame defaults generated project-scoped artifacts to .flameframe/ and
+    creates .flameframe/.gitignore so downloaded media, context packs, segments,
+    and zoom frames stay out of git.
+
     <work-dir>/video.mp4
         Normalized local video for URL downloads or copied local input.
 
@@ -134,15 +138,15 @@ EXAMPLES
 
     Process a URL without captions:
         flameframe process 'https://www.youtube.com/watch?v=VIDEO_ID' \
-          --work-dir data/no-captions \
+          --work-dir .flameframe/no-captions \
           --no-captions
 
     Zoom around a timestamp:
-        flameframe zoom data/example/video.mp4 \
+        flameframe zoom .flameframe/example/video.mp4 \
           --at 00:10:00 \
           --window 12 \
           --fps 2 \
-          --out data/example/zooms/00-10-00
+          --out .flameframe/example/zooms/00-10-00
 
 NOTES
     FlameFrame is local-first. It does not call an AI API. It produces files that

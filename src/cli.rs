@@ -118,7 +118,7 @@ pub struct IngestArgs {
     #[arg(long, default_value_t = 2.0)]
     pub fps:             f64,
     /// Directory for URL downloads before ingest.
-    #[arg(long, default_value = "data/downloads")]
+    #[arg(long, default_value = crate::workspace::PROJECT_WORKSPACE)]
     pub download_out:    PathBuf,
     /// Exact work directory for URL input. Makes repeatable agent workflows
     /// easy.
@@ -162,7 +162,7 @@ pub struct DownloadArgs {
     /// HTTP(S) video URL.
     pub url:             String,
     /// Root directory for downloaded URL media.
-    #[arg(long, default_value = "data/downloads")]
+    #[arg(long, default_value = crate::workspace::PROJECT_WORKSPACE)]
     pub out:             PathBuf,
     /// Exact download directory instead of creating a timestamped child under
     /// --out.

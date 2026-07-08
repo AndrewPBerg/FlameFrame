@@ -5,6 +5,7 @@ mod ffmpeg;
 mod manual;
 mod pipeline;
 mod upgrade;
+mod workspace;
 mod ytdlp;
 
 use anyhow::Result;

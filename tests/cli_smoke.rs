@@ -69,6 +69,17 @@ fn upgrade_rejects_unsafe_repo_values() -> io::Result<()> {
 }
 
 #[test]
+fn url_download_defaults_to_project_flameframe_directory() -> io::Result<()> {
+    let output = flameframe(&["download", "--help"])?;
+
+    assert!(output.status.success(), "stderr: {}", stderr(&output));
+    let stdout = stdout(&output);
+    assert!(stdout.contains("[default: .flameframe]"), "stdout: {stdout}");
+    assert!(!stdout.contains("data/downloads"), "stdout: {stdout}");
+    Ok(())
+}
+
+#[test]
 fn manual_documents_primary_workflows_and_upgrade() -> io::Result<()> {
     let output = flameframe(&["man"])?;
 

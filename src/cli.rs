@@ -25,6 +25,8 @@ pub enum Command {
     Doctor(DoctorArgs),
     /// Upgrade flameframe from GitHub Releases using the install script.
     Upgrade(UpgradeArgs),
+    /// Remove the FlameFrame binary currently running.
+    Uninstall,
     /// Run the full agent-context workflow: ingest, split, context, verify.
     Process(ProcessArgs),
     /// Compile a video into a .frameflame evidence pack.

@@ -36,6 +36,9 @@ Upgrade later:
 
 ```bash
 flameframe upgrade
+
+# Remove the binary currently running (prompts for confirmation)
+flameframe uninstall
 ```
 
 ## Main workflows

@@ -1,6 +1,8 @@
 use std::{
-    io,
-    process::{Command, Output},
+    env, fs,
+    io::{self, Write},
+    process::{self, Command, Output, Stdio},
+    time::{SystemTime, UNIX_EPOCH},
 };
 
 fn flameframe(args: &[&str]) -> io::Result<Output> {
@@ -80,6 +82,42 @@ fn url_download_defaults_to_project_flameframe_directory() -> io::Result<()> {
 }
 
 #[test]
+fn uninstall_requires_confirmation() -> io::Result<()> {
+    let mut child = Command::new(env!("CARGO_BIN_EXE_flameframe"))
+        .arg("uninstall")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+    child.stdin.take().ok_or_else(|| io::Error::other("stdin is not piped"))?.write_all(b"n\n")?;
+    let output = child.wait_with_output()?;
+
+    assert!(output.status.success(), "stderr: {}", stderr(&output));
+    assert!(stdout(&output).contains("Uninstall cancelled."));
+    Ok(())
+}
+
+#[cfg(not(windows))]
+#[test]
+fn uninstall_removes_the_binary_currently_running() -> io::Result<()> {
+    let nonce = SystemTime::now().duration_since(UNIX_EPOCH).map_err(io::Error::other)?.as_nanos();
+    let copy = env::temp_dir().join(format!("flameframe-uninstall-test-{}-{nonce}", process::id()));
+    fs::copy(env!("CARGO_BIN_EXE_flameframe"), &copy)?;
+
+    let mut child = Command::new(&copy)
+        .arg("uninstall")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()?;
+    child.stdin.take().ok_or_else(|| io::Error::other("stdin is not piped"))?.write_all(b"y\n")?;
+    let output = child.wait_with_output()?;
+
+    assert!(output.status.success(), "stderr: {}", stderr(&output));
+    assert!(stdout(&output).contains("Removed:"));
+    assert!(!copy.exists(), "binary was not removed: {}", copy.display());
+    Ok(())
+}
+
+#[test]
 fn manual_documents_primary_workflows_and_upgrade() -> io::Result<()> {
     let output = flameframe(&["man"])?;
 
@@ -88,5 +126,6 @@ fn manual_documents_primary_workflows_and_upgrade() -> io::Result<()> {
     assert!(stdout.contains("YouTube URL"), "stdout: {stdout}");
     assert!(stdout.contains("Local video file"), "stdout: {stdout}");
     assert!(stdout.contains("flameframe upgrade"), "stdout: {stdout}");
+    assert!(stdout.contains("flameframe uninstall"), "stdout: {stdout}");
     Ok(())
 }

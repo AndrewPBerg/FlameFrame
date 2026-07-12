@@ -4,6 +4,7 @@ mod diagnostics;
 mod ffmpeg;
 mod manual;
 mod pipeline;
+mod uninstall;
 mod upgrade;
 mod workspace;
 mod ytdlp;
@@ -19,6 +20,7 @@ fn main() -> Result<()> {
         Command::Man => manual::print(),
         Command::Doctor(args) => diagnostics::run_doctor(args.json),
         Command::Upgrade(args) => upgrade::run(&args),
+        Command::Uninstall => uninstall::run(),
         Command::Process(args) => pipeline::process(&args),
         Command::Ingest(args) => pipeline::ingest(&args),
         Command::Download(args) => pipeline::download(&args),

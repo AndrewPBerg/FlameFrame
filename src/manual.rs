@@ -12,6 +12,7 @@ SYNOPSIS
     flameframe -v
     flameframe doctor [--json]
     flameframe upgrade [--version <VERSION>] [--dry-run]
+    flameframe uninstall
     flameframe process <URL_OR_VIDEO> --work-dir <DIR> [OPTIONS]
     flameframe inspect <URL_OR_VIDEO_OR_PACK> [--timeout-seconds <SECONDS>]
     flameframe zoom <VIDEO> --at <TIMESTAMP> [--window <SECONDS>] [--fps <FPS>] [--out <DIR>]
@@ -85,6 +86,10 @@ COMMANDS
         Re-run the GitHub Release install script. Use --dry-run to preview the
         platform command without network or filesystem changes.
 
+    uninstall
+        Ask for confirmation, then remove the binary currently running. This
+        works for release-script, Cargo, and locally built binaries.
+
     process
         Run the complete workflow for a URL or local video.
 
@@ -120,7 +125,8 @@ DEPENDENCIES
         yt-dlp       required for URL inputs only
 
     Run `flameframe doctor` after installing FlameFrame. Run `flameframe upgrade`
-    to update to the latest GitHub Release binary.
+    to update to the latest GitHub Release binary. Run `flameframe uninstall` to
+    remove the binary currently running.
 
 INSTALLATION
     FlameFrame is shipped as GitHub Release binaries. Install scripts download the

@@ -86,7 +86,7 @@ pub fn download_url(url: &str, config: &DownloadConfig) -> Result<DownloadResult
     validate_url(url)?;
     let job_dir =
         config.output_dir.clone().unwrap_or_else(|| config.output_root.join(job_dir_name()));
-    workspace::ensure_project_gitignore_for(&job_dir)?;
+    workspace::ensure_gitignore_for(&job_dir)?;
     fs::create_dir_all(&job_dir)
         .with_context(|| format!("failed to create {}", job_dir.display()))?;
 

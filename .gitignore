@@ -15,3 +15,4 @@ coverage.xml
 # wt-forge config (user-specific)
 .wt-forge.*
 data/
+.flameframe/

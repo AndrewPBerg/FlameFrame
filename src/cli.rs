@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use clap::{ArgAction, Args, Parser, Subcommand, ValueEnum};
+use clap::{ArgAction, ArgGroup, Args, Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]
 #[command(
@@ -27,6 +27,11 @@ pub enum Command {
     Upgrade(UpgradeArgs),
     /// Remove the FlameFrame binary currently running.
     Uninstall,
+    /// Install the FlameFrame skill for an AI agent.
+    Agent {
+        #[command(subcommand)]
+        command: AgentCommand,
+    },
     /// Run the full agent-context workflow: ingest, split, context, verify.
     Process(ProcessArgs),
     /// Compile a video into a .frameflame evidence pack.
@@ -67,6 +72,64 @@ pub struct UpgradeArgs {
     /// Print the upgrade command without running it.
     #[arg(long)]
     pub dry_run:     bool,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum AgentCommand {
+    /// Install the FlameFrame skill.
+    Install(AgentInstallArgs),
+}
+
+#[allow(clippy::struct_excessive_bools)]
+#[derive(Debug, Args)]
+#[command(group(
+    ArgGroup::new("agent")
+        .required(true)
+        .args(["claude", "codex", "agents", "pi"])
+))]
+pub struct AgentInstallArgs {
+    /// Install for Claude Code.
+    #[arg(long)]
+    pub claude:  bool,
+    /// Install for Codex.
+    #[arg(long)]
+    pub codex:   bool,
+    /// Install for a generic Agents-compatible client.
+    #[arg(long)]
+    pub agents:  bool,
+    /// Install for Pi.
+    #[arg(long)]
+    pub pi:      bool,
+    /// Install in the current project instead of the user-wide location.
+    #[arg(long, conflicts_with = "global")]
+    pub project: bool,
+    /// Install in the user-wide location (the default).
+    #[arg(long, conflicts_with = "project")]
+    pub global:  bool,
+}
+
+impl AgentInstallArgs {
+    pub fn kind(&self) -> anyhow::Result<AgentKind> {
+        if self.claude {
+            Ok(AgentKind::Claude)
+        } else if self.codex {
+            Ok(AgentKind::Codex)
+        } else if self.agents {
+            Ok(AgentKind::Agents)
+        } else if self.pi {
+            Ok(AgentKind::Pi)
+        } else {
+            anyhow::bail!("select one agent: --claude, --codex, --agents, or --pi")
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum AgentKind {
+    Claude,
+    Codex,
+    Agents,
+    Pi,
 }
 
 #[derive(Debug, Args)]

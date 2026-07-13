@@ -1,3 +1,4 @@
+mod agent;
 mod cli;
 mod context;
 mod diagnostics;
@@ -21,6 +22,9 @@ fn main() -> Result<()> {
         Command::Doctor(args) => diagnostics::run_doctor(args.json),
         Command::Upgrade(args) => upgrade::run(&args),
         Command::Uninstall => uninstall::run(),
+        Command::Agent { command } => match command {
+            cli::AgentCommand::Install(args) => agent::install(&args),
+        },
         Command::Process(args) => pipeline::process(&args),
         Command::Ingest(args) => pipeline::ingest(&args),
         Command::Download(args) => pipeline::download(&args),

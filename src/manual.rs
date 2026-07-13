@@ -13,6 +13,7 @@ SYNOPSIS
     flameframe doctor [--json]
     flameframe upgrade [--version <VERSION>] [--dry-run]
     flameframe uninstall
+    flameframe agent install <--claude|--codex|--agents|--pi> [--project|--global]
     flameframe process <URL_OR_VIDEO> --work-dir <DIR> [OPTIONS]
     flameframe inspect <URL_OR_VIDEO_OR_PACK> [--timeout-seconds <SECONDS>]
     flameframe zoom <VIDEO> --at <TIMESTAMP> [--window <SECONDS>] [--fps <FPS>] [--out <DIR>]
@@ -90,8 +91,20 @@ COMMANDS
         Ask for confirmation, then remove the binary currently running. This
         works for release-script, Cargo, and locally built binaries.
 
+    agent install
+        Install the FlameFrame skill for Claude, Codex, generic Agents, or Pi.
+        Choose exactly one of --claude, --codex, --agents, or --pi. Installs are
+        user-wide by default; pass --project to install into the current project.
+        The Pi install also adds a session-scoped evidence browser extension.
+        Restart Pi or run /reload, then use /flameframe-browser to inspect frames
+        parsed in the session. In the browser: o opens the image and its complete
+        transcript window (j/k scroll it), c copies its path (or places it in the
+        editor when no clipboard helper is available), and z prepares a zoom command.
+
     process
-        Run the complete workflow for a URL or local video.
+        Run the complete workflow for a URL or local video. Completed runs are
+        cached in the system temporary directory by input identity and processing
+        settings; later matching runs reuse the indexed artifacts.
 
     ingest
         Compile a video into a .frameflame evidence pack.

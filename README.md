@@ -41,6 +41,25 @@ flameframe upgrade
 flameframe uninstall
 ```
 
+## Agent skills
+
+Install the FlameFrame skill for an agent. Installations are user-wide by default;
+pass `--project` to write into the current repository instead.
+
+```bash
+flameframe agent install --claude
+flameframe agent install --codex --project
+flameframe agent install --agents
+flameframe agent install --pi --project
+```
+
+The Pi install also adds a session-scoped evidence browser extension. After
+restarting Pi or running `/reload`, FlameFrame runs appear in the session shelf;
+use `/flameframe-browser` to inspect their selected frames. Use `o` for a native terminal
+image preview and its complete transcript window (`j`/`k` scroll it), `c` to copy the
+selected image path (or place it in the editor when no clipboard helper is available),
+and `z` to prepare a zoom command.
+
 ## Main workflows
 
 YouTube URL:
@@ -62,7 +81,7 @@ flameframe process ./recording.mp4 \
   --segment-seconds 60
 ```
 
-FlameFrame writes generated project-scoped artifacts under `.flameframe/` by default and creates `.flameframe/.gitignore` so evidence packs, downloads, segments, and zooms stay out of git.
+FlameFrame writes generated project-scoped artifacts under `.flameframe/` by default and creates `.flameframe/.gitignore` so evidence packs, downloads, segments, and zooms stay out of git. Completed `process` runs are also cached under the system temporary directory; a later run with the same URL or local file path and processing settings reports an `inspect cache: hit` and reuses the indexed artifacts.
 
 Agent review order:
 

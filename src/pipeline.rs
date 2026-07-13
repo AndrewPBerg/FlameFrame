@@ -65,6 +65,22 @@ pub fn process(args: &ProcessArgs) -> Result<()> {
     fs::create_dir_all(&args.work_dir)
         .with_context(|| format!("failed to create {}", args.work_dir.display()))?;
 
+    let cache = workspace::ProcessCache::for_input(&args.input, &process_cache_variant(args))?;
+    let _lock = cache.lock()?;
+    if cache.restore(&args.work_dir)? {
+        output_line(format_args!("inspect cache: hit ({})", cache.display().display()))?;
+        return finish_process(args, process_video_path(args));
+    }
+
+    output_line(format_args!("inspect cache: miss ({})", cache.display().display()))?;
+    let video = process_uncached(args)?;
+    finish_process(args, video)?;
+    cache.store(&args.work_dir)?;
+    output_line(format_args!("inspect cache: stored ({})", cache.display().display()))?;
+    Ok(())
+}
+
+fn process_uncached(args: &ProcessArgs) -> Result<PathBuf> {
     let input_is_url = ytdlp::is_probably_url(&args.input);
     let local_video = if input_is_url {
         None
@@ -73,11 +89,10 @@ pub fn process(args: &ProcessArgs) -> Result<()> {
     };
     let ingest_input =
         local_video.as_ref().map_or_else(|| args.input.clone(), |path| path.display().to_string());
-
     let pack = args.work_dir.join("video.frameflame");
     let ingest_args = IngestArgs {
         input:           ingest_input,
-        out:             Some(pack.clone()),
+        out:             Some(pack),
         mode:            Mode::Fast,
         budget:          args.budget,
         fps:             args.fps,
@@ -92,23 +107,25 @@ pub fn process(args: &ProcessArgs) -> Result<()> {
     ingest(&ingest_args)?;
 
     let video = local_video.unwrap_or_else(|| args.work_dir.join("video.mp4"));
-    let split_args = SplitArgs {
+    split(&SplitArgs {
         video:           video.clone(),
         out:             Some(args.work_dir.join("segments")),
         segment_seconds: args.segment_seconds,
-    };
-    split(&split_args)?;
+    })?;
+    Ok(video)
+}
 
-    let context_args = ContextArgs {
+fn finish_process(args: &ProcessArgs, video: PathBuf) -> Result<()> {
+    let pack = args.work_dir.join("video.frameflame");
+    context(&ContextArgs {
         dir:            args.work_dir.clone(),
         captions:       None,
         video:          Some(video.clone()),
         pack:           Some(pack.clone()),
         window_seconds: args.window_seconds,
-    };
-    context(&context_args)?;
+    })?;
 
-    let verify_args = VerifyArgs {
+    verify(&VerifyArgs {
         dir:              args.work_dir.clone(),
         video:            Some(video),
         pack:             Some(pack),
@@ -116,8 +133,30 @@ pub fn process(args: &ProcessArgs) -> Result<()> {
         min_frames:       1,
         require_segments: true,
         require_zoom:     false,
-    };
-    verify(&verify_args)
+    })
+}
+
+fn process_video_path(args: &ProcessArgs) -> PathBuf {
+    if ytdlp::is_probably_url(&args.input) {
+        return args.work_dir.join("video.mp4");
+    }
+
+    let source = PathBuf::from(&args.input);
+    let extension = source.extension().and_then(|value| value.to_str()).unwrap_or("mp4");
+    args.work_dir.join(format!("video.{extension}"))
+}
+
+fn process_cache_variant(args: &ProcessArgs) -> String {
+    format!(
+        "cache_version=1;budget={};fps={};segment_seconds={};window_seconds={};max_height={};sub_langs={};no_captions={}",
+        args.budget,
+        args.fps,
+        args.segment_seconds,
+        args.window_seconds,
+        args.max_height,
+        args.sub_langs,
+        args.no_captions
+    )
 }
 
 fn copy_process_input_video(input: &str, work_dir: &Path) -> Result<PathBuf> {
